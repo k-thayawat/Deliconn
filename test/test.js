@@ -6,5 +6,5 @@ describe('App', function() {
     request(app)
       .get('/')
       .expect(/Welcome to Express/, done);
-  });
-}); 
+  })
+})
