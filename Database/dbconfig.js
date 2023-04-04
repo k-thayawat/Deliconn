@@ -7,9 +7,6 @@ const connection = mysql.createPool({
   host: 'localhost',
   user: 'root',
   database: 'deliconn',
-  port : 3306
 });
 
-
-//module.exports = connection.promise()
 module.exports = connection;
