@@ -7,15 +7,14 @@
 var app = require('../app');
 var debug = require('debug')('demo:server');
 var http = require('http');
-//var environment = require('dotenv').config()
+require('dotenv').config()
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.APP_PORT || '3000');
 app.set('port', port);
-
 /**
  * Create HTTP server.
  */
@@ -26,6 +25,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
+console.log('running on port ' + process.env.APP_PORT)
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
