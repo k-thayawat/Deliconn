@@ -6,20 +6,19 @@ router.get('/list' , (req , res) => {
     db.getConnection((err, connection) =>{
     if (err) throw err
         //console.log('connected as id  ',connection.threadId)
-        let qry = 'select c.company_id,b.branch_id from company c,branch b where c.company_id=b.company_id'
+        let qry = 'select * from company c,branch b where c.company_id=b.company_id'
+        let Js = {}
        // let qry = 'SELECT * FROM company'
-        connection.query(qry ,(err,rows) => {
-        connection.release()
+        connection.query(qry ,(err,rec) => {
+        //connection.release()
         if (!err){
-          if (rows > 0){
-          res.json(rows)
-          }else{
-            res.json(
-              "There is no table"
-            )
-          }
+          res.json(rec)
+         // for (let row of rec.rows)
+          //{
+            
+         // }
         }else{
-          res.send(err)
+          res.send(err).status(400)
         }
     })
     })
