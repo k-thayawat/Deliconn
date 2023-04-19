@@ -5,18 +5,12 @@ const db = require('../database/dbconfig.js');
 router.post('/new' , (req , res) => {
     db.getConnection((err, connection) =>{
     if (err) throw err
-        //const { taxid, title, name1, name2,shortname,active} = req.body
-        //foreach (let ww of req.body.branch[*])
-        //{
-
-        // }
-        //console.log('connected as id  ',connection.threadId)
         let qry = 'select * from company c,branch b where c.company_id=b.company_id'
        // let qry = 'SELECT * FROM company'
         connection.query(qry ,(err,rows) => {
         //connection.release()
         if (!err){
-          //res.json(rows)
+          res.json(rows)
         }else{
           res.send(err).status(400)
         }
