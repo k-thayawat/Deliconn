@@ -3,14 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var newlog = require("log4js")
+var errlog = newlog.getLogger()
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var companyRouter = require('./routes/company');
+var companyAdminRouter = require('./routes/companyadmin')
 
 var app = express();
 
-// view engine setup
+//view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -20,9 +23,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', indexRouter)
+app.use('/users', usersRouter)
 app.use('/company', companyRouter)
+app.use('/companyadmin', companyAdminRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -37,7 +41,11 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({
+    ErrorCode:err.status,
+    ErrorMessage:err.message
+  })
+  //res.render('error');
 });
 
 module.exports = app;
