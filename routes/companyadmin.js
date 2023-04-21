@@ -22,10 +22,10 @@ router.get("/list", (req, res) => {
         let companybuffer = "";
         for (let i = 0; i < len; i++) {
           //Same Company
-          if (rec[i].taxid != companybuffer){
+          if (rec[i].taxid != companybuffer) {
             Obb = [];
             company = {};
-            companybuffer = rec[i].taxid
+            companybuffer = rec[i].taxid;
             company = {
               company: rec[i].company_id,
               taxid: rec[i].taxid,
@@ -37,8 +37,8 @@ router.get("/list", (req, res) => {
               branch: Obb,
               insertdate: rec[i].update_date,
               insertby: rec[i].update_by,
-            }
-            ComRec.push(company)
+            };
+            ComRec.push(company);
             branch = {};
             branch = {
               branchid: rec[i].branch_id,
@@ -53,9 +53,9 @@ router.get("/list", (req, res) => {
               country: rec[i].country,
               language: rec[i].remark,
               remark: rec[i].actived_flag,
-            }
+            };
             Obb.push(branch);
-          }else{
+          } else {
             branch = {};
             branch = {
               branchid: rec[i].branch_id,
@@ -70,12 +70,12 @@ router.get("/list", (req, res) => {
               country: rec[i].country,
               language: rec[i].remark,
               remark: rec[i].actived_flag,
-            }
+            };
             Obb.push(branch);
           }
         }
         res.json({
-          companylist:ComRec
+          companylist: ComRec,
         });
       } else {
         res.json(err).status(400);
@@ -89,85 +89,124 @@ router.post("/new", (req, res) => {
   let arr = [];
   let errmsg = {};
   let IsError = false;
+  //Check data
   if (!req.body.taxid) {
     errmsg.message = "taxid is required";
     arr.push(errmsg);
     errmsg = {};
-    IsError = true
+    IsError = true;
   }
   if (!req.body.name1) {
     errmsg.message = "name1 is required";
     arr.push(errmsg);
-    IsError = true
+    errmsg = {};
+    IsError = true;
   }
-  if (!IsError){
+  if (!req.body.shortname) {
+    errmsg.message = "shortname is required";
+    arr.push(errmsg);
+    errmsg = {};
+    IsError = true;
+  }
+  // if (!req.body.language) {
+  //   errmsg.message = "language is required";
+  //   arr.push(errmsg);
+  //   errmsg = {};
+  //   IsError = true;
+  // }
+  //end check
+  if (!IsError) {
     db.getConnection((err, connection) => {
-      if (err){
-        arr.push(err)
-        res.json({
-          Errcode : res.status,
-          Errstatus: arr
-        })
-      }else{
+      if (err) {
+        arr.push(err);
+        res.status(500).json({
+          Errcode: 500,
+          Errstatus: arr,
+        });
+      } else {
         connection.beginTransaction((err) => {
-          if (err){
-            arr.push(err)
+          if (err) {
+            arr.push(err);
             res.json({
-              Errcode : res.status,
-              Errstatus:[arr]
-            })
-          }else{
-            let qry = `INSERT INTO company (taxid, title, name1, name2, shortname, actived_flag, insert_date, insert_by)  VALUES ('${req.body.taxid}', '${req.body.title}', '${req.body.name1}', '${req.body.name2}', '${req.body.shortname}', '${req.body.active}','${req.body.insertdate}','${req.body.insertby}')`
-            connection.query((err,rec) => {
-              if (err){
-                arr.push(err)
-                res.json({
-                  Errcode : res.status,
-                  Errstatus:[arr]
-                })
-              }else{
-                connection.commit((err)=>{
+              Errcode: 500,
+              Errstatus: arr,
+            });
+          } else {
+           // let qry1 = "INSERT INTO company (taxid, title, name1, shortname, actived_flag) VALUES (?, ?, ?, ?, ?)";
+            //let params1 = [req.body.taxid, req.body.title, req.body.name1, req.body.shortname, req.body.active];
+            let qry1 = "INSERT INTO company (taxid) VALUES (?)";
+            let params1 = [req.body.taxid];
+            connection.query(qry1, params1, (err, record) => {
+              if (err) {
+                connection.rollback();
+                arr.push(err.message);
+                res.status(400).json({
+                  Errcode: 400,
+                  Errstatus: arr,
+                });
+              } else {
+                if (req.body.branch) {
+                  console.log(req.body)
                   for (let i = 0; i < req.body.branch.length(); i++) {
-                    qry =  `INSERT INTO branch (company_taxid, branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (${req.body.taxid},${req.body.branch[i].code}, ${req.body.branch[i].name}, ${req.body.branch[i].housenumber}, ${req.body.branch[i].address1}, ${req.body.branch[i].subdistrict}, ${req.body.branch[i].district}, ${req.body.branch[i].province}, ${req.body.branch[i].zipcode}, ${req.body.branch[i].country}, ${req.body.branch[i].language}, ${req.body.branch[i].remark})`
-                    connection.query(qry ,(err,rec) => {
-                      if (err){
+                    qry = "INSERT INTO branch (company_taxid, branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    params = [req.body.taxid, req.body.branch[i].code, req.body.branch[i].name, req.body.branch[i].housenumber, req.body.branch[i].address1, req.body.branch[i].subdistrict, req.body.branch[i].district, req.body.branch[i].province, req.body.branch[i].zipcode, req.body.branch[i].country, req.body.branch[i].language, req.body.branch[i].remark];
+                    connection.query(qry, params, (err, rec) => {
+                      if (err) {
                         connection.rollback(() => {
-                         connection.release();
-                          arr.push(err)
+                          connection.release();
+                          arr.push(err);
                           res.json({
-                            Errcode : res.status,
-                            Errstatus:[arr]
-                          }) 
+                            Errcode: 400,
+                            Errstatus: arr,
+                          });
                         });
-                      }else{
-                        con.commit(function(err, rs) {
-                          if(err){
+                      } else {
+                        connection.commit(function (err, rs) {
+                          if (err) {
                             connection.release(() => {
-                             res.json({
-                                ErrorCode: res.status(200),
-                                ErrStatus : 'Successfully Inserted'
-                              })
-                            })
+                              res.json({
+                                ErrorCode: 200,
+                                ErrStatus: "Successfully Inserted",
+                              });
+                            });
                           }
-                       })
+                          connection.release();
+                        });
                       }
-                    })
+                    });
                   }
-                })
+                  //no branch
+                } else {
+                  con.commit((err, rs) => {
+                    if (err) {
+                      
+                        res.json({
+                          ErrorCode: 200,
+                          ErrStatus: "Successfully Inserted",
+                        });
+                      
+                    }else{
+                      res.status(200).json({
+                        errorcode: 200,
+                        errmsg: 'insert success',
+                      });
+                    }
+                    connection.release();
+                  });
+                }
               }
-            })
+            });
           }
-        })
+        });
       }
-    })
-  }else{
+    });
+  } else {
     res.status(400).json({
-      errorcode:400,
-      errmsg:arr
-    })
+      errorcode: 400,
+      errmsg: arr,
+    });
   }
-})
-
+});
 
 //Update existing company
 router.put("/update", (req, res) => {
