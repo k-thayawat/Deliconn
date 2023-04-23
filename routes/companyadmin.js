@@ -109,9 +109,9 @@ router.post("/new", (req, res) => {
     IsError = true;
   }
   if (!req.body.insertdate) {
-    var insertdate = new Date()
-  }else{
-    insertdate = req.body.insertdate
+    var insertdate = new Date();
+  } else {
+    insertdate = req.body.insertdate;
   }
   // if (!req.body.language) {
   //   errmsg.message = "language is required";
@@ -137,8 +137,18 @@ router.post("/new", (req, res) => {
               Errstatus: arr,
             });
           } else {
-            qry = "INSERT INTO company (company_id ,taxid, title, name1, shortname, actived_flag, language, insert_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            params = [req.body.company_id, req.body.taxid, req.body.title, req.body.name1, req.body.shortname, req.body.active, req.body.language, insertdate];
+            qry =
+              "INSERT INTO company (company_id ,taxid, title, name1, shortname, actived_flag, language, insert_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            params = [
+              req.body.company_id,
+              req.body.taxid,
+              req.body.title,
+              req.body.name1,
+              req.body.shortname,
+              req.body.active,
+              req.body.language,
+              insertdate,
+            ];
 
             connection.query(qry, params, (err, record) => {
               if (err) {
@@ -150,10 +160,24 @@ router.post("/new", (req, res) => {
                 });
               } else {
                 if (req.body.branch) {
-                  console.log(req.body)
+                  console.log(req.body);
                   for (let i = 0; i < req.body.branch.length; i++) {
-                    let qrybranch = "INSERT INTO branch (company_id , branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                    let branchpr = [req.body.company_id, req.body.branch[i].code, req.body.branch[i].name, req.body.branch[i].housenumber, req.body.branch[i].address1, req.body.branch[i].subdistrict, req.body.branch[i].district, req.body.branch[i].province, req.body.branch[i].zipcode, req.body.branch[i].country, req.body.branch[i].language, req.body.branch[i].remark];
+                    let qrybranch =
+                      "INSERT INTO branch (company_id , branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    let branchpr = [
+                      req.body.company_id,
+                      req.body.branch[i].code,
+                      req.body.branch[i].name,
+                      req.body.branch[i].housenumber,
+                      req.body.branch[i].address1,
+                      req.body.branch[i].subdistrict,
+                      req.body.branch[i].district,
+                      req.body.branch[i].province,
+                      req.body.branch[i].zipcode,
+                      req.body.branch[i].country,
+                      req.body.branch[i].language,
+                      req.body.branch[i].remark,
+                    ];
                     connection.query(qrybranch, branchpr, (err, recb) => {
                       if (err) {
                         connection.rollback(() => {
@@ -175,9 +199,9 @@ router.post("/new", (req, res) => {
                             });
                           }
                           res.status(201).json({
-                            ErrorCode : 201,
-                            ErrStatus : rs
-                          })
+                            ErrorCode: 201,
+                            ErrStatus: rs,
+                          });
                           connection.release();
                         });
                       }
@@ -187,14 +211,14 @@ router.post("/new", (req, res) => {
                 } else {
                   connection.commit((err, rs) => {
                     if (err) {
-                        res.json({
-                          ErrorCode: 200,
-                          ErrStatus: "Successfully Inserted",
-                        });
-                    }else{
+                      res.json({
+                        ErrorCode: 200,
+                        ErrStatus: "Successfully Inserted",
+                      });
+                    } else {
                       res.status(200).json({
                         errorcode: 200,
-                        errmsg: 'insert success',
+                        errmsg: "insert success",
                       });
                     }
                     connection.release();
@@ -215,27 +239,41 @@ router.post("/new", (req, res) => {
 });
 
 //Update existing company
-router.put("/update", (req, res) => {
-  db.getConnection((err, connection) => {
-    if (err) throw err;
-    try {
-  
-    }catch(error){
-
+router.put("/updatecompany", (req, res) => {
+  //if (!req.body) {
+    if (!req.body.company_id){
+      db.getConnection((err, connection) => {
+        if (err) throw err;
+        const updateQuery = `UPDATE company SET taxid = ?, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
+        const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
+        connection.query(updateQuery, data, (error, results, fields) => {
+          if (error) {
+            connection.release();
+            res.status(400).json({
+              ErrorCode : 400,
+              ErrMessage : error
+            })
+          } else {
+            res.status(200).json({
+              ErrorCode : 200,
+              ErrMessage : results,
+              fields : fields
+            })
+          }
+        });
+      });
+    }else{
+      res.status(400).json({
+        Errorcode : 400,
+        Errmessage : 'Companyid is required'
+      })
     }
-    //console.log('connected as id  ',connection.threadId)
-    let qry =
-      "select * from company c,branch b where c.company_id=b.company_id";
-    // let qry = 'SELECT * FROM company'
-    connection.query(qry, (err, rows) => {
-      //connection.release()
-      if (!err) {
-        res.json(rows);
-      } else {
-        res.send(err).status(400);
-      }
-    });
-  });
+  //}else{ 
+    //res.status(400).json({
+     // ErrorCode : 400,
+     // Errmessage : 'Body Message is required'
+    //})
+ // }
 });
 
 module.exports = router;
