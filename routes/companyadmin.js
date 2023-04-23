@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const db = require("../database/dbconfig.js");
+const db = require("../Database/dbconfig.js");
 const { DATETIME } = require("mysql/lib/protocol/constants/types.js");
 
 //Get Company
@@ -108,6 +108,11 @@ router.post("/new", (req, res) => {
     errmsg = {};
     IsError = true;
   }
+  if (!req.body.insertdate) {
+    var insertdate = new Date()
+  }else{
+    insertdate = req.body.insertdate
+  }
   // if (!req.body.language) {
   //   errmsg.message = "language is required";
   //   arr.push(errmsg);
@@ -132,11 +137,10 @@ router.post("/new", (req, res) => {
               Errstatus: arr,
             });
           } else {
-           // let qry1 = "INSERT INTO company (taxid, title, name1, shortname, actived_flag) VALUES (?, ?, ?, ?, ?)";
-            //let params1 = [req.body.taxid, req.body.title, req.body.name1, req.body.shortname, req.body.active];
-            let qry1 = "INSERT INTO company (taxid) VALUES (?)";
-            let params1 = [req.body.taxid];
-            connection.query(qry1, params1, (err, record) => {
+            qry = "INSERT INTO company (company_id ,taxid, title, name1, shortname, actived_flag, language, insert_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            params = [req.body.company_id, req.body.taxid, req.body.title, req.body.name1, req.body.shortname, req.body.active, req.body.language, insertdate];
+
+            connection.query(qry, params, (err, record) => {
               if (err) {
                 connection.rollback();
                 arr.push(err.message);
@@ -147,10 +151,10 @@ router.post("/new", (req, res) => {
               } else {
                 if (req.body.branch) {
                   console.log(req.body)
-                  for (let i = 0; i < req.body.branch.length(); i++) {
-                    qry = "INSERT INTO branch (company_taxid, branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                    params = [req.body.taxid, req.body.branch[i].code, req.body.branch[i].name, req.body.branch[i].housenumber, req.body.branch[i].address1, req.body.branch[i].subdistrict, req.body.branch[i].district, req.body.branch[i].province, req.body.branch[i].zipcode, req.body.branch[i].country, req.body.branch[i].language, req.body.branch[i].remark];
-                    connection.query(qry, params, (err, rec) => {
+                  for (let i = 0; i < req.body.branch.length; i++) {
+                    let qrybranch = "INSERT INTO branch (company_id , branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    let branchpr = [req.body.company_id, req.body.branch[i].code, req.body.branch[i].name, req.body.branch[i].housenumber, req.body.branch[i].address1, req.body.branch[i].subdistrict, req.body.branch[i].district, req.body.branch[i].province, req.body.branch[i].zipcode, req.body.branch[i].country, req.body.branch[i].language, req.body.branch[i].remark];
+                    connection.query(qrybranch, branchpr, (err, recb) => {
                       if (err) {
                         connection.rollback(() => {
                           connection.release();
@@ -165,11 +169,15 @@ router.post("/new", (req, res) => {
                           if (err) {
                             connection.release(() => {
                               res.json({
-                                ErrorCode: 200,
-                                ErrStatus: "Successfully Inserted",
+                                ErrorCode: 400,
+                                ErrStatus: err,
                               });
                             });
                           }
+                          res.status(201).json({
+                            ErrorCode : 201,
+                            ErrStatus : rs
+                          })
                           connection.release();
                         });
                       }
@@ -177,14 +185,12 @@ router.post("/new", (req, res) => {
                   }
                   //no branch
                 } else {
-                  con.commit((err, rs) => {
+                  connection.commit((err, rs) => {
                     if (err) {
-                      
                         res.json({
                           ErrorCode: 200,
                           ErrStatus: "Successfully Inserted",
                         });
-                      
                     }else{
                       res.status(200).json({
                         errorcode: 200,
@@ -212,6 +218,11 @@ router.post("/new", (req, res) => {
 router.put("/update", (req, res) => {
   db.getConnection((err, connection) => {
     if (err) throw err;
+    try {
+  
+    }catch(error){
+
+    }
     //console.log('connected as id  ',connection.threadId)
     let qry =
       "select * from company c,branch b where c.company_id=b.company_id";
