@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/main.js",
+    "start": "node ./bin/index.js",
     "test": "mocha"
   },
   "dependencies": {
