@@ -239,11 +239,12 @@ router.post("/new", (req, res) => {
 });
 
 //Update existing company
-router.put("/updatecompany", (req, res) => {
+router.put("/update", (req, res) => {
   //if (!req.body) {
-    if (!req.body.company_id){
+    if (!req.body.company){
       db.getConnection((err, connection) => {
         if (err) throw err;
+        let taxid = (!req.body.taxid ? "" : req.body.taxid)
         const updateQuery = `UPDATE company SET taxid = ?, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
         const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
         connection.query(updateQuery, data, (error, results, fields) => {
