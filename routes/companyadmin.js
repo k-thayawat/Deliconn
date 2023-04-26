@@ -140,7 +140,7 @@ router.post("/new", (req, res) => {
             qry =
               "INSERT INTO company (company_id ,taxid, title, name1, shortname, actived_flag, language, insert_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             params = [
-              req.body.company_id,
+              req.body.company,
               req.body.taxid,
               req.body.title,
               req.body.name1,
@@ -165,7 +165,7 @@ router.post("/new", (req, res) => {
                     let qrybranch =
                       "INSERT INTO branch (company_id , branch_code, branch_name, house_number, address1, sub_district, district, province, zipcode, country, language, remark) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     let branchpr = [
-                      req.body.company_id,
+                      req.body.company,
                       req.body.branch[i].code,
                       req.body.branch[i].name,
                       req.body.branch[i].housenumber,
