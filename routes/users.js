@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const db = require('../database/dbconfig.js');
+const db = require('../Database/dbconfig.js');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
