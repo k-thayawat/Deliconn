@@ -240,41 +240,44 @@ router.post("/new", (req, res) => {
 
 //Update existing company
 router.put("/update", (req, res) => {
-  //if (!req.body) {
-    if (!req.body.company){
-      db.getConnection((err, connection) => {
-        if (err) throw err;
-        let taxid = (!req.body.taxid ? "" : req.body.taxid)
-        const updateQuery = `UPDATE company SET taxid = ?, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
-        const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
-        connection.query(updateQuery, data, (error, results, fields) => {
-          if (error) {
-            connection.release();
-            res.status(400).json({
-              ErrorCode : 400,
-              ErrMessage : error
-            })
-          } else {
-            res.status(200).json({
-              ErrorCode : 200,
-              ErrMessage : results,
-              fields : fields
-            })
-          }
-        });
+  if (req.body){
+    const comid = (!req.body.company ? "" : req.body.company)
+    const taxid = (!req.body.taxid ? "" : req.body.taxid)
+    const title = (!req.body.title ? "" : req.body.title)
+    const name1 = (!req.body.name1 ? "" : req.body.name1)
+    const name2 = (!req.body.name2 ? "" : req.body.name2)
+    const sName = (!req.body.sName ? "" : req.body.sName)
+    const active = (!req.body.active ? "" : req.body.active)
+    const insertdate = (!req.body.insertdate ? "" : req.body.insertdate)
+    const insertby = (!req.body.insertby ? "" : req.body.insertby)
+  
+    db.getConnection((err, connection) => {
+      
+      const updateQuery = `UPDATE company SET ${str}, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
+      //const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
+      const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
+      connection.query(updateQuery, data, (error, results, fields) => {
+        if (error) {
+          connection.release();
+          res.status(400).json({
+            ErrorCode : 400,
+            ErrMessage : error
+          })
+        } else {
+          res.status(200).json({
+            ErrorCode : 200,
+            ErrMessage : results,
+            fields : fields
+          })
+        }
       });
-    }else{
-      res.status(400).json({
-        Errorcode : 400,
-        Errmessage : 'Companyid is required'
-      })
-    }
-  //}else{ 
-    //res.status(400).json({
-     // ErrorCode : 400,
-     // Errmessage : 'Body Message is required'
-    //})
- // }
+    });
+  }else{
+    res.status(400).json({
+      Errorcode : 400,
+      Errmessage : 'Companyid is required'
+    })
+  }
 });
 
 module.exports = router;
