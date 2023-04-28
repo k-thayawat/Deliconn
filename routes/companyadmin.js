@@ -240,44 +240,165 @@ router.post("/new", (req, res) => {
 
 //Update existing company
 router.put("/update", (req, res) => {
-  if (req.body){
-    const comid = (!req.body.company ? "" : req.body.company)
-    const taxid = (!req.body.taxid ? "" : req.body.taxid)
-    const title = (!req.body.title ? "" : req.body.title)
-    const name1 = (!req.body.name1 ? "" : req.body.name1)
-    const name2 = (!req.body.name2 ? "" : req.body.name2)
-    const sName = (!req.body.sName ? "" : req.body.sName)
-    const active = (!req.body.active ? "" : req.body.active)
-    const insertdate = (!req.body.insertdate ? "" : req.body.insertdate)
-    const insertby = (!req.body.insertby ? "" : req.body.insertby)
-  
+  if (req.body.company) {
+    //handel request String
+    let updateqry = "UPDATE company SET ";
+    let params = [];
+    if (req.body.taxid) {
+      updateqry = updateqry.concat("taxid = ?,");
+      params.push(req.body.taxid);
+    }
+    if (req.body.title) {
+      updateqry = updateqry.concat("title = ?,");
+      params.push(req.body.title);
+    }
+    if (req.body.name1) {
+      updateqry = updateqry.concat("name1 = ?,");
+      params.push(req.body.name1);
+    }
+    if (req.body.name2) {
+      updateqry = updateqry.concat("name2 = ?,");
+      params.push(req.body.name2);
+    }
+    if (req.body.shortname) {
+      updateqry = updateqry.concat("shortname = ?,");
+      params.push(req.body.shortname);
+    }
+    if (req.body.active) {
+      let active = (req.body.active = true ? 1 : 0);
+      updateqry = updateqry.concat("actived_flag = ?,");
+      params.push(active);
+    }
+    if (req.body.language) {
+      updateqry = updateqry.concat("language = ?,");
+      params.push(req.body.language);
+    }
+
+    updateqry = updateqry.concat("WHERE company_id = ?");
+    updateqry = updateqry.replace(",WHERE", " WHERE");
+    params.push(req.body.company);
+    //Array of Errors
+    let err = [];
     db.getConnection((err, connection) => {
-      
-      const updateQuery = `UPDATE company SET ${str}, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
-      //const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
-      const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
-      connection.query(updateQuery, data, (error, results, fields) => {
-        if (error) {
-          connection.release();
-          res.status(400).json({
-            ErrorCode : 400,
-            ErrMessage : error
-          })
-        } else {
-          res.status(200).json({
-            ErrorCode : 200,
-            ErrMessage : results,
-            fields : fields
-          })
-        }
-      });
+      if (!err) {
+        connection.beginTransaction((err) => {
+          if (err) {
+            //arr.push(err);
+            res.status(500).send(Returnformat(500, err));
+          } else {
+            connection.query(updateqry, params, (error, results, fields) => {
+              if (error) {
+                connection.release();
+                res.status(400).send(Returnformat(500, error));
+              } else {
+                if (req.body.branch) {
+                  updateqry = "";
+                  params = [];
+                  for (let i = 0; i < req.body.branch.length; i++) {
+                    updateqry = updateqry.concat("UPDATE branch SET ");
+                    if (req.body.branch[i].code) {
+                      updateqry = updateqry.concat("branch_code = ?,");
+                      params.push(req.body.branch[i].code);
+                    }
+                    if (req.body.branch[i].name) {
+                      updateqry = updateqry.concat("branch_name = ?,");
+                      params.push(req.body.branch[i].name);
+                    }
+                    if (req.body.branch[i].housenumber) {
+                      updateqry = updateqry.concat("house_number = ?,");
+                      params.push(req.body.branch[i].housenumber);
+                    }
+                    if (req.body.branch[i].address1) {
+                      updateqry = updateqry.concat("address1 = ?,");
+                      params.push(req.body.branch[i].address1);
+                    }
+                    if (req.body.branch[i].subdistrict) {
+                      updateqry = updateqry.concat("sub_district = ?,");
+                      params.push(req.body.branch[i].subdistrict);
+                    }
+                    if (req.body.branch[i].district) {
+                      updateqry = updateqry.concat("district = ?,");
+                      params.push(req.body.branch[i].district);
+                    }
+                    if (req.body.branch[i].province) {
+                      updateqry = updateqry.concat("province = ?,");
+                      params.push(req.body.branch[i].province);
+                    }
+                    if (req.body.branch[i].zipcode) {
+                      updateqry = updateqry.concat("zipcode = ?,");
+                      params.push(req.body.branch[i].zipcode);
+                    }
+                    if (req.body.branch[i].country) {
+                      updateqry = updateqry.concat("country = ?,");
+                      params.push(req.body.branch[i].country);
+                    }
+                    if (req.body.branch[i].language) {
+                      updateqry = updateqry.concat("language = ?,");
+                      params.push(req.body.branch[i].language);
+                    }
+                    if (req.body.branch[i].remark) {
+                      updateqry = updateqry.concat("remark = ?,");
+                      params.push(req.body.branch[i].remark);
+                    }
+                    //Added last as Where
+                    updateqry = updateqry.concat(
+                      "WHERE branch_id = ? and company_id = ?"
+                    );
+                    updateqry = updateqry.replace(",WHERE", " WHERE");
+
+                    if (req.body.branch[i].length !=req.body.branch.length - 1) {
+                      updateqry = updateqry.concat(";");
+                    }
+                    params.push(req.body.branch[i].branchid, req.body.company);
+                  }
+                  connection.query(updateqry, params, (err, recb) => {
+                    if (err) {
+                      connection.rollback();
+                      connection.release();
+                      res.status(400).send(Returnformat(400, err));
+                    } else {
+                      connection.commit((err) => {
+                        if (err) {
+                          connection.rollback();
+                          connection.release();
+                          res.status(500).send(Returnformat(500, err));
+                        } else {
+                          connection.release();
+                          res
+                            .status(200)
+                            .send(Returnformat(200, "Update Company and branch Success"));
+                        }
+                      });
+                    }
+                  });
+                } else {
+                  connection.commit((err) => {
+                    if (err) {
+                      res.status(500).send(Returnformat(500, err));
+                    } else {
+                      connection.release();
+                      res
+                        .status(200)
+                        .send(Returnformat(200, "Update Company Success"));
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+      }
     });
-  }else{
-    res.status(400).json({
-      Errorcode : 400,
-      Errmessage : 'Companyid is required'
-    })
+  } else {
+    res.status(400).send(Returnformat(400, "company is requried"));
   }
 });
 
+function Returnformat(st, msg) {
+  const Error = {
+    code: st,
+    message: msg,
+  };
+  return Error;
+}
 module.exports = router;
