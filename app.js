@@ -8,7 +8,7 @@ var errlog = newlog.getLogger()
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var companyRouter = require('./routes/company');
+var companyRouter = require('./routes/companyprofile');
 var companyAdminRouter = require('./routes/companyadmin')
 
 var app = express();
@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter)
 app.use('/users', usersRouter)
-app.use('/company', companyRouter)
+app.use('/companyprofile', companyRouter)
 app.use('/companyadmin', companyAdminRouter)
 
 // catch 404 and forward to error handler

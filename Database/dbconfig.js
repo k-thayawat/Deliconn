@@ -7,7 +7,8 @@ const connection = mysql.createPool({
   host: 'db4free.net',
   user: 'malice',
   password : 'malice12',
-  database: 'kanja_db'
+  database: 'kanja_db',
+  multipleStatements: true
 });
 
 module.exports = connection;
