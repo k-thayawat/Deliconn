@@ -252,7 +252,7 @@ router.put("/update", (req, res) => {
     const insertby = (!req.body.insertby ? "" : req.body.insertby)
   
     db.getConnection((err, connection) => {
-      
+      //new remote from kanpc
       const updateQuery = `UPDATE company SET ${str}, title = ?, name1 = ?, name2 = ?, shortname = ?, active_flag = ?, language = ?, WHERE id = ?`;
       //const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
       const data = [req.body.taxid, req.body.title, req.body.name1,req.body.name2, req.body.shortname, req.body.active_flag, req.body.language, company_id]
